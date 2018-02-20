@@ -58,10 +58,11 @@ def get_env_feedback(S, A):
     return S_, R
 
 
-def update_env(S, episode, step_counter):
+def update_env(S, episode, step_counter, q_table):
     # This is how environment be updated
     env_list = ['-']*(N_STATES-1) + ['T']   # '---------T' our environment
     if S == 'terminal':
+        print(q_table)
         interaction = 'Episode %s: total_steps = %s' % (episode+1, step_counter)
         print('\r{}'.format(interaction), end='')
         time.sleep(2)
@@ -80,7 +81,7 @@ def rl():
         step_counter = 0
         S = 0
         is_terminated = False
-        update_env(S, episode, step_counter)
+        update_env(S, episode, step_counter, q_table)
         while not is_terminated:
 
             A = choose_action(S, q_table)
@@ -95,7 +96,7 @@ def rl():
             q_table.loc[S, A] += ALPHA * (q_target - q_predict)  # update
             S = S_  # move to next state
 
-            update_env(S, episode, step_counter+1)
+            update_env(S, episode, step_counter+1, q_table)
             step_counter += 1
     return q_table
 
