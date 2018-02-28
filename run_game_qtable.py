@@ -13,14 +13,14 @@ next_move = 1
 qr_observation_count = (initial_cards + max_recycle_deck + cards_in_hand + position + on_right + next_move) * 2
 
 num_episodes = 2000
-counter = 0
 
 # reward list
 rList = []
 
-RL = QLearningTable(actions=list(range(0,4)))
+RL = QLearningTable(actions=list(range(0, 4)))
 
-for i in range(num_episodes):
+
+def play_game(is_learning):
     game.setup(1)
 
     rAll = 0
@@ -52,21 +52,29 @@ for i in range(num_episodes):
         game.players[0].racers[1].draw_hand()
         s3 = game.current_observation()
 
-        RL.learn(str(s),a1,r,str((s2)))
-        RL.learn(str(s2), a2, r, str((s3)))
+        if is_learning:
+            RL.learn(str(s), a1, r, str((s2)))
+            RL.learn(str(s2), a2, r, str((s3)))
 
         rAll += r
         if result:
             break
     rList.append(rAll)
 
-    counter += 1
 
-    if counter == 100:
-        print('Current Table')
-        print(RL)
-        counter = 0
+if __name__ == '__main__':
+    counter = 0
 
-print ('Score over time: ' + str(sum(rList) / num_episodes))
-print ('Final Q-Table Values')
-print (RL)
+    for i in range(num_episodes):
+        play_game(True)
+
+        counter += 1
+
+        if counter == 100:
+            print('Current Table')
+            print(RL.q_table)
+            counter = 0
+
+    print('Score over time: ' + str(sum(rList) / num_episodes))
+    print('Final Q-Table Values')
+    print(RL.q_table)
