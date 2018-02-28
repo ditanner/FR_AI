@@ -61,7 +61,10 @@ def play_game(is_learning):
             r = 1
 
         game.players[0].racers[1].draw_hand()
-        s3 = game.current_observation()
+        if result:
+            s3 = 'terminal'
+        else:
+            s3 = game.current_observation()
 
         if is_learning:
             RL.learn(str(s), a1, r, str((s2)))
@@ -84,7 +87,7 @@ if __name__ == '__main__':
         if counter == 200:
             print('Current Table')
             print(RL.q_table)
-            print(i, 'out of', num_episodes, 'episodes completed')
+            print(i+1, 'out of', num_episodes, 'episodes completed')
             counter = 0
 
     print('Score over time: ' + str(sum(rList) / num_episodes))
