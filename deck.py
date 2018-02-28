@@ -1,8 +1,9 @@
 import random
 
 from FR_enums import Racer_Type
+from functools import total_ordering
 
-
+@total_ordering
 class Card:
     def __init__(self, value=0):
         self.value = value
@@ -12,6 +13,15 @@ class Card:
 
     def __repr__(self):
         return "Card (" + str(self.value) + ")"
+
+    def __eq__(self, other):
+        return self.value == other.value
+
+    def __ne__(self, other):
+        return not (self == other)
+
+    def __lt__(self, other):
+        return self.value < other.value
 
 
 class Deck:

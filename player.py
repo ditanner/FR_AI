@@ -44,6 +44,7 @@ class Racer:
             self.recycle_deck.cards = []
 
         self.hand_selection = self.deck.draw(4)
+        self.hand_selection.sort()
 
     def move_token(self, places, others):
         self.token.distance_from_finish -= places

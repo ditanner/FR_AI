@@ -26,7 +26,9 @@ def current_observation():
     for player in players:
         for racer in player.racers:
             deck = [i.value for i in racer.deck.cards]
+            deck.sort()
             recycle_deck = [i.value for i in racer.recycle_deck.cards]
+            recycle_deck.sort()
             hand = [i.value for i in racer.hand_selection]
             next_move = -1
             if racer.next_move is not None:
