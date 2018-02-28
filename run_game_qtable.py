@@ -45,6 +45,10 @@ def play_game(is_learning):
         game.players[0].racers[0].select_move(a2)
 
         result = game.make_move()
+
+        if not is_learning:
+            game.draw_course()
+
         r = 0
         if result:
             r = 1
@@ -70,9 +74,10 @@ if __name__ == '__main__':
 
         counter += 1
 
-        if counter == 100:
+        if counter == 200:
             print('Current Table')
             print(RL.q_table)
+            print(i, 'out of', num_episodes, 'episodes completed')
             counter = 0
 
     print('Score over time: ' + str(sum(rList) / num_episodes))
