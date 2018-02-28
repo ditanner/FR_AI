@@ -12,7 +12,7 @@ on_right = 1
 next_move = 1
 qr_observation_count = (initial_cards + max_recycle_deck + cards_in_hand + position + on_right + next_move) * 2
 
-num_episodes = 500
+num_episodes = 2000
 
 # reward list
 rList = []
@@ -52,6 +52,7 @@ def play_game(is_learning):
                 racers = [*racers, *player.racers]
             racers.sort()
             racers.reverse()
+            game.print_cards()
             game.draw_course(racers)
             if result:
                 print(j, 'turns taken')
