@@ -59,16 +59,14 @@ def play_game(is_learning):
         r = 0
         if result:
             r = 1
-
-        game.players[0].racers[1].draw_hand()
-        if result:
             s3 = 'terminal'
         else:
+            game.players[0].racers[1].draw_hand()
             s3 = game.current_observation()
 
         if is_learning:
-            RL.learn(str(s), a1, r, str((s2)))
             RL.learn(str(s2), a2, r, str((s3)))
+            RL.learn(str(s), a1, r, str((s2)))
 
         rAll += r
         if result:
