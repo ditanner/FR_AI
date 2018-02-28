@@ -3,19 +3,40 @@ from time import sleep
 import player
 from square import Square
 
-import os
-
-def cls():
-    #os.system('cls' if os.name=='nt' else 'clear')
-    clear = "\n" * 100
-    print (clear)
+import colorama
+from colorama import Fore
 
 players = []
 
 
-def setup():
-    players.append(player.Player('Player 1', 1))
-    players.append(player.Player('Player 2', 2))
+def cls():
+    clear = "\n" * 100
+    print(clear)
+
+
+def setup(number_of_players):
+    players.clear()
+    players.append(player.Player('Player 1', 1, Fore.RED))
+    if number_of_players > 1:
+        players.append(player.Player('Player 2', 2, Fore.YELLOW))
+
+
+def current_observation():
+    results = []
+    for player in players:
+        for racer in player.racers:
+            deck = [i.value for i in racer.deck.cards]
+            recycle_deck = [i.value for i in racer.recycle_deck.cards]
+            hand = [i.value for i in racer.hand_selection]
+            next_move = -1
+            if racer.next_move is not None:
+                next_move = racer.next_move.value
+            results = [*results, *(deck + [-1] * 15)[:15], *(recycle_deck + [-1] * 15)[:15],
+                       *(hand + [-1] * 4)[:4], next_move, racer.token.distance_from_finish,
+                       racer.token.on_right]
+
+    return results
+
 
 
 def current_state():
@@ -98,11 +119,77 @@ def draw_state(reversed_racers):
     print(squares[len(squares) - 1].position)
 
 
-def take_turn():
+def draw_course(reversed_racers):
+    track_position = 99
+    for current_racer in reversed_racers:
+        if current_racer.token.distance_from_finish < track_position:
+            for i in range(track_position, current_racer.token.distance_from_finish, -1):
+                print('  ', end=' ')
+                track_position -= 1
+        if current_racer.token.distance_from_finish == track_position:
+            if current_racer.token.on_right == 0:
+                print(current_racer.colour + current_racer.label, end=' ')
+            else:
+                print('  ', end=' ')
+
+            track_position -= 1
+
+        # print('  ', end=' ')
+
+    print(Fore.RESET)
+
+    track_position = 99
+    for current_racer in reversed_racers:
+        if current_racer.token.distance_from_finish < track_position:
+            for i in range(track_position, current_racer.token.distance_from_finish, -1):
+                print('  ', end=' ')
+                track_position -= 1
+        if current_racer.token.distance_from_finish == track_position:
+            if current_racer.token.on_right == 1:
+                print(current_racer.colour + current_racer.label, end=' ')
+                track_position -= 1
+            else:
+                continue
+
+        # print('  ', end=' ')
+
+    print(Fore.RESET)
+
+    for i in range(99, 0, -1):
+        print('{:2d}'.format(i), end=' ')
+
+    print('F')
+
+
+def print_cards():
+    for player in players:
+        for i in range(0, 2):
+            print(player.racers[i].colour + player.racers[i].name, 'Deck:', end=' ')
+            for card in player.racers[i].deck.cards:
+                print(card.value, end=' ')
+
+            print('Recycle:', end=' ')
+
+            for card in player.racers[i].recycle_deck.cards:
+                print(card.value, end=' ')
+
+            print(Fore.RESET)
+
+
+def make_move():
+    ready_to_go = True
+    for game_player in players:
+        for racer in game_player.racers:
+            if racer.next_move is None:
+                ready_to_go = False
+
+    if not ready_to_go:
+        return
+
     racers = []
     # select next move
     for game_player in players:
-        game_player.select_move()
+        #        game_player.select_move()
         racers = [*racers, *game_player.racers]
 
     #    print(racers)
@@ -121,20 +208,15 @@ def take_turn():
     reversed_racers = racers.copy()
     reversed_racers.reverse()
 
-    draw_state(reversed_racers)
-    sleep(1)
+    #    draw_state(reversed_racers)
+    #    sleep(1)
 
     apply_slipstream(reversed_racers)
     #    print(racers)
 
     add_exhaustion(racers)
 
-    draw_state(reversed_racers)
+    # draw_state(reversed_racers)
 
+    # draw_course(reversed_racers)
     return racers[0].token.distance_from_finish < 0
-
-
-setup()
-while not take_turn():
-    print('Next Round')
-    sleep(2)

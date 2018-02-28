@@ -4,39 +4,46 @@ import deck
 
 
 class Player:
-    def __init__(self, name, number):
+    def __init__(self, name, number, colour):
         self.name = name
-
-        sprinteur_racer = Racer(name, Racer_Type.SPRINTEUR, ((8 * 6) + (12 * 2)) + number, 1)
-        rouleur_racer = Racer(name, Racer_Type.ROULEUR, ((8 * 6) + (12 * 2)) + number, 0)
+        self.colour = colour
+        sprinteur_racer = Racer(name, Racer_Type.SPRINTEUR, ((8 * 6) + (12 * 2)) + number, 1, colour)
+        rouleur_racer = Racer(name, Racer_Type.ROULEUR, ((8 * 6) + (12 * 2)) + number, 0, colour)
         self.racers = (sprinteur_racer, rouleur_racer)
-
-    def select_move(self):
-        for racer in self.racers:
-            racer.select_move()
 
 
 class Racer:
-    def __init__(self, name, type, starting_position, on_right):
+    def __init__(self, name, type, starting_position, on_right, colour):
         self.name = name + ' ' + type.name
         self.type = type
         self.label = name[len(name)-1] + type.name[0]
         self.token = Token(self.name, starting_position, on_right)
         self.deck = deck.getDeck(self.type)
         self.recycle_deck = deck.Deck('Recycle Deck')
-        self.next_move = ''
+        self.next_move = None
+        self.colour = colour
+        self.hand_selection = []
 
 
         self.deck.shuffle()
 
-    def select_move(self):
-        hand_selection = self.deck.draw(1)
+    def select_move(self, cardNo):
+        if len(self.hand_selection) == 4 and 0 <= cardNo <= 3:
+            # select which card to use
+            self.next_move = self.hand_selection[cardNo]
 
-        # select which card to use
-        self.next_move = hand_selection[0]
+            self.hand_selection.remove(self.next_move)
+            self.recycle_deck.cards = [*self.recycle_deck.cards, *self.hand_selection]
 
-        hand_selection.remove(self.next_move)
-        self.recycle_deck.cards = [*self.recycle_deck.cards, *hand_selection]
+            self.label = str(self.next_move.value) + self.type.name[0]
+
+    def draw_hand(self):
+        if len(self.deck.cards) < 4:
+            self.recycle_deck.shuffle()
+            self.deck.cards = [*self.deck.cards, *(self.recycle_deck.cards)]
+            self.recycle_deck.cards = []
+
+        self.hand_selection = self.deck.draw(4)
 
     def move_token(self, places, others):
         self.token.distance_from_finish -= places
@@ -52,6 +59,8 @@ class Racer:
                 else:
                     self.token.on_right = 0
                     continue
+
+        self.next_move = None
 
     def take_move(self, others):
         self.move_token(self.next_move.value, others)

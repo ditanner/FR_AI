@@ -24,7 +24,7 @@ class Deck:
 
     def draw(self, number_of_cards=1):
         result = [];
-        while number_of_cards > 0:
+        while number_of_cards > 0 and len(self.cards) > 0:
             result.append(self.cards.pop());
             number_of_cards -= 1
 
