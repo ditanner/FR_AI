@@ -127,7 +127,8 @@ def draw_state(reversed_racers):
 
 
 def draw_course(reversed_racers):
-    track_position = 99
+    start_track_position = 75
+    track_position = start_track_position
     for current_racer in reversed_racers:
         if current_racer.token.distance_from_finish < track_position:
             for i in range(track_position, current_racer.token.distance_from_finish, -1):
@@ -145,7 +146,7 @@ def draw_course(reversed_racers):
 
     print(Fore.RESET)
 
-    track_position = 99
+    track_position = start_track_position
     for current_racer in reversed_racers:
         if current_racer.token.distance_from_finish < track_position:
             for i in range(track_position, current_racer.token.distance_from_finish, -1):
@@ -162,7 +163,7 @@ def draw_course(reversed_racers):
 
     print(Fore.RESET)
 
-    for i in range(99, 0, -1):
+    for i in range(start_track_position, 0, -1):
         print('{:2d}'.format(i), end=' ')
 
     print('F')
@@ -237,4 +238,7 @@ def make_move():
     # draw_state(reversed_racers)
 
     # draw_course(reversed_racers)
-    return racers[0].token.distance_from_finish < 0
+    if racers[0].token.distance_from_finish < 0:
+        return racers[0]
+    else:
+        return False
