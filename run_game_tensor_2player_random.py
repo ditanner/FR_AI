@@ -15,7 +15,7 @@ next_move = 1
 qr_observation_count = (initial_cards + max_recycle_deck + cards_in_hand + position + on_right + next_move) * 4
 
 
-num_episodes = 3000
+num_episodes = 10000
 
 # reward list
 rList = []
@@ -24,8 +24,8 @@ RL = DeepQNetwork(n_actions=4, n_features=qr_observation_count,
                   learning_rate=0.01,
                   reward_decay=0.9,
                   e_greedy=0.9,
-                  replace_target_iter=2000,
-                  memory_size=20000,
+                  replace_target_iter=20,
+                  memory_size=200000,
                   # output_graph=True
                   )
 
@@ -34,7 +34,7 @@ def play_racer_RL(racer, is_learning):
     s = game.current_observation()
     a1 = RL.choose_action(s)
     while not racer.is_valid_move(a1):
-        RL.store_transition(s, a1, -1, s)
+#        RL.store_transition(s, a1, -0.1, s)
         a1 = RL.choose_action(s)
 
     racer.select_move(a1)
@@ -106,7 +106,7 @@ def play_game(is_learning):
         if is_learning:
             RL.store_transition(s, a1, r, s2)
             RL.store_transition(s2, a2, r, s3)
-            if (counter > 200) and (counter % 10 == 0):
+            if (counter > 500) and (counter % 10 == 0):
                 RL.learn()
 
         rAll += r

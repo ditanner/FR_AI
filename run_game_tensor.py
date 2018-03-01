@@ -14,7 +14,7 @@ on_right = 1
 next_move = 1
 qr_observation_count = (initial_cards + max_recycle_deck + cards_in_hand + position + on_right + next_move) * 2
 
-num_episodes = 2000
+num_episodes = 20000
 
 # reward list
 rList = []
