@@ -4,7 +4,7 @@ import tensorflow as tf
 
 from TensorNet import DeepQNetwork
 
-print('TensorNet, 1 player game, R then S')
+print('TensorNet, 2 player game, R then S')
 
 initial_cards = 7
 max_recycle_deck = 7
@@ -12,7 +12,7 @@ cards_in_hand = 4
 position = 1
 on_right = 1
 next_move = 1
-num_players = 1
+num_players = 2
 qr_observation_count = (initial_cards + max_recycle_deck + cards_in_hand + position + on_right + next_move) * (
             2 * num_players)
 game = g.Game()
@@ -49,8 +49,8 @@ def play_racer_max(racer):
     racer.select_move(len(racer.hand_selection) - 1)
 
 
-def play_game(is_learning, rList, use_RL=True):
-    game.setup(1, starting_distance=30)
+def play_game(is_learning, rList):
+    game.setup(num_players, starting_distance=30)
 
     if not is_learning:
         racers = []
@@ -70,12 +70,11 @@ def play_game(is_learning, rList, use_RL=True):
     while j < 99:
         j += 1
 
-        if use_RL:
-            s, a1 = play_racer_RL(game.players[0].racers[1], is_learning)
-            s2, a2 = play_racer_RL(game.players[0].racers[0], is_learning)
-        else:
-            play_racer_max(game.players[0].racers[0])
-            play_racer_max(game.players[0].racers[1])
+        s, a1 = play_racer_RL(game.players[0].racers[1], is_learning)
+        s2, a2 = play_racer_RL(game.players[0].racers[0], is_learning)
+
+        play_racer_max(game.players[1].racers[0])
+        play_racer_max(game.players[1].racers[1])
 
         if not is_learning and num_players > 1:
             game.print_cards_for_racer(game.players[1].racers[1])
@@ -94,14 +93,14 @@ def play_game(is_learning, rList, use_RL=True):
                 print(result.name, ' won,', j, 'turns taken')
 
         r = 0
-        if result and (result == game.players[0].racers[0] or result == game.players[0].racers[1]):
-            r = 100 - j
+        if result: #and (result == game.players[0].racers[0] or result == game.players[0].racers[1]):
+            r = 30 - j
         elif result:
             r = -1
 
         s3 = game.current_observation()
 
-        if is_learning and use_RL:
+        if is_learning:
             RL.store_transition(s, a1, r, s2)
             RL.store_transition(s2, a2, r, s3)
             if (counter > 500) and (counter % 10 == 0):
@@ -138,8 +137,7 @@ if __name__ == '__main__':
     r_list = []
     r_m_list = []
     for i in range(num_episodes):
-        play_game(True, r_list, use_RL=True)
-        play_game(True, r_m_list, use_RL=False)
+        play_game(True, r_list)
 
         counter += 1
 
@@ -162,6 +160,6 @@ if __name__ == '__main__':
     mov_ave_cnt = 50
 
     lines = ax.plot(np.arange(len(r_list) - (mov_ave_cnt-1)), moving_average(r_list, mov_ave_cnt), 'r-', lw=1)
-    lines = ax.plot(np.arange(len(r_m_list) - (mov_ave_cnt-1)), moving_average(r_m_list, mov_ave_cnt), 'g-', lw=1)
+#    lines = ax.plot(np.arange(len(r_m_list) - (mov_ave_cnt-1)), moving_average(r_m_list, mov_ave_cnt), 'g-', lw=1)
     print('Score over time: ' + str(sum(r_list) / num_episodes))
     plt.pause(0.1)
