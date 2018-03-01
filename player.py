@@ -4,11 +4,11 @@ import deck
 
 
 class Player:
-    def __init__(self, name, number, colour):
+    def __init__(self, name, number, colour, starting_line):
         self.name = name
         self.colour = colour
-        sprinteur_racer = Racer(name, Racer_Type.SPRINTEUR, ((8 * 6) + (12 * 2)) + number, 1, colour)
-        rouleur_racer = Racer(name, Racer_Type.ROULEUR, ((8 * 6) + (12 * 2)) + number, 0, colour)
+        sprinteur_racer = Racer(name, Racer_Type.SPRINTEUR, starting_line + number, 1, colour)
+        rouleur_racer = Racer(name, Racer_Type.ROULEUR, starting_line + number, 0, colour)
         self.racers = (sprinteur_racer, rouleur_racer)
 
 

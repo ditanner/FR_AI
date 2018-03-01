@@ -1,10 +1,10 @@
-import game
+import game as g
 import numpy as np
 import tensorflow as tf
 
 from TensorNet import DeepQNetwork
 
-print('TensorNet, 2 player game, R then S')
+print('TensorNet, 1 player game, R then S')
 
 initial_cards = 7
 max_recycle_deck = 7
@@ -13,29 +13,31 @@ position = 1
 on_right = 1
 next_move = 1
 num_players = 1
-qr_observation_count = (initial_cards + max_recycle_deck + cards_in_hand + position + on_right + next_move) * (2 * num_players)
+qr_observation_count = (initial_cards + max_recycle_deck + cards_in_hand + position + on_right + next_move) * (
+            2 * num_players)
+game = g.Game()
 
-
-num_episodes = 20000
+num_episodes = 10000
 
 # reward list
 rList = []
 
 RL = DeepQNetwork(n_actions=4, n_features=qr_observation_count,
-                  learning_rate=0.1,
+                  learning_rate=0.01,
                   reward_decay=0.9,
                   e_greedy=0.9,
-                  replace_target_iter=20,
+                  replace_target_iter=64,
                   memory_size=20000,
                   # output_graph=True
                   )
+
 
 def play_racer_RL(racer, is_learning):
     racer.draw_hand()
     s = game.current_observation()
     a1 = RL.choose_action(s)
     while not racer.is_valid_move(a1):
-#        RL.store_transition(s, a1, -0.1, s)
+        #        RL.store_transition(s, a1, -0.1, s)
         a1 = RL.choose_action(s)
 
     racer.select_move(a1)
@@ -44,13 +46,14 @@ def play_racer_RL(racer, is_learning):
 
     return s, a1
 
+
 def play_racer_max(racer):
     racer.draw_hand()
-    racer.select_move(len(racer.hand_selection)-1)
+    racer.select_move(len(racer.hand_selection) - 1)
 
 
 def play_game(is_learning):
-    game.setup(2)
+    game.setup(1, starting_distance=30)
 
     if not is_learning:
         racers = []
@@ -59,7 +62,6 @@ def play_game(is_learning):
         racers.sort()
         racers.reverse()
         game.draw_course(racers)
-
 
     rAll = 0
     d = False
@@ -71,17 +73,16 @@ def play_game(is_learning):
     while j < 99:
         j += 1
 
-        s, a1 = play_racer_RL(game.players[0].racers[1], is_learning)
+        # s, a1 = play_racer_RL(game.players[0].racers[1], is_learning)
 
-        s2, a2 = play_racer_RL(game.players[0].racers[0], is_learning)
+        # s2, a2 = play_racer_RL(game.players[0].racers[0], is_learning)
 
-        play_racer_max(game.players[1].racers[0])
-        play_racer_max(game.players[1].racers[1])
+        play_racer_max(game.players[0].racers[0])
+        play_racer_max(game.players[0].racers[1])
 
-        if not is_learning:
+        if not is_learning and num_players > 1:
             game.print_cards_for_racer(game.players[1].racers[1])
             game.print_cards_for_racer(game.players[1].racers[0])
-
 
         result = game.make_move()
 
@@ -95,20 +96,20 @@ def play_game(is_learning):
             if result:
                 print(result.name, ' won,', j, 'turns taken')
 
-
         r = 0
         if result and (result == game.players[0].racers[0] or result == game.players[0].racers[1]):
-            r = 1
+            r = 30 - j
         elif result:
             r = -1
 
-        s3 = game.current_observation()
+#        s3 = game.current_observation()
 
         if is_learning:
-            RL.store_transition(s, a1, r, s2)
-            RL.store_transition(s2, a2, r, s3)
+ #           RL.store_transition(s, a1, r, s2)
+ #           RL.store_transition(s2, a2, r, s3)
             if (counter > 500) and (counter % 10 == 0):
-                RL.learn()
+ #               RL.learn()
+                pass
 
         rAll += r
         if result:
@@ -128,7 +129,8 @@ def play_game(is_learning):
 
     rList.append(rAll)
 
-def moving_average(a, n=3) :
+
+def moving_average(a, n=3):
     ret = np.cumsum(a, dtype=float)
     ret[n:] = ret[n:] - ret[:-n]
     return ret[n - 1:] / n
@@ -153,14 +155,13 @@ if __name__ == '__main__':
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
     ax.scatter(np.arange(len(rList)), rList)
-#    ax.yaxis.label = 'Result'
-#    ax.xaxis.label = 'episode'
+    #    ax.yaxis.label = 'Result'
+    #    ax.xaxis.label = 'episode'
 
     plt.ion()
     plt.show()
+    mov_ave_cnt = 50
 
-    lines = ax.plot(np.arange(len(rList)-19), moving_average(rList, 20), 'r-', lw=1)
+    lines = ax.plot(np.arange(len(rList) - (mov_ave_cnt-1)), moving_average(rList, mov_ave_cnt), 'r-', lw=1)
     print('Score over time: ' + str(sum(rList) / num_episodes))
     plt.pause(0.1)
-
-
