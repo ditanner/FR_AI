@@ -4,7 +4,7 @@ import tensorflow as tf
 
 from TensorNet import DeepQNetwork
 
-print('TensorNet, 1 player game, R then S')
+print('TensorNet, 2 player game, R then S')
 
 initial_cards = 7
 max_recycle_deck = 7
@@ -15,7 +15,7 @@ next_move = 1
 qr_observation_count = (initial_cards + max_recycle_deck + cards_in_hand + position + on_right + next_move) * 4
 
 
-num_episodes = 2000
+num_episodes = 3000
 
 # reward list
 rList = []
@@ -24,10 +24,28 @@ RL = DeepQNetwork(n_actions=4, n_features=qr_observation_count,
                   learning_rate=0.01,
                   reward_decay=0.9,
                   e_greedy=0.9,
-                  replace_target_iter=200,
-                  memory_size=2000,
+                  replace_target_iter=2000,
+                  memory_size=20000,
                   # output_graph=True
                   )
+
+def play_racer_RL(racer, is_learning):
+    racer.draw_hand()
+    s = game.current_observation()
+    a1 = RL.choose_action(s)
+    while not racer.is_valid_move(a1):
+        RL.store_transition(s, a1, -1, s)
+        a1 = RL.choose_action(s)
+
+    racer.select_move(a1)
+    if not is_learning:
+        game.print_cards_for_racer(racer)
+
+    return s, a1
+
+def play_racer_max(racer):
+    racer.draw_hand()
+    racer.select_move(len(racer.hand_selection)-1)
 
 
 def play_game(is_learning):
@@ -52,25 +70,12 @@ def play_game(is_learning):
     while j < 99:
         j += 1
 
-        # choose an action by greedily (with noise) picking from Q table
-        game.players[0].racers[1].draw_hand()
-        s = game.current_observation()
-        a1 = RL.choose_action(s)
-        game.players[0].racers[1].select_move(a1)
-        if not is_learning:
-            game.print_cards_for_racer(game.players[0].racers[1])
+        s, a1 = play_racer_RL(game.players[0].racers[1], is_learning)
 
-        game.players[0].racers[0].draw_hand()
-        s2 = game.current_observation()
-        a2 = RL.choose_action(s2)
-        game.players[0].racers[0].select_move(a2)
-        if not is_learning:
-            game.print_cards_for_racer(game.players[0].racers[0])
+        s2, a2 = play_racer_RL(game.players[0].racers[0], is_learning)
 
-        game.players[1].racers[0].draw_hand()
-        game.players[1].racers[0].select_move(3)
-        game.players[1].racers[1].draw_hand()
-        game.players[1].racers[1].select_move(3)
+        play_racer_max(game.players[1].racers[0])
+        play_racer_max(game.players[1].racers[1])
 
         if not is_learning:
             game.print_cards_for_racer(game.players[1].racers[1])
@@ -108,6 +113,18 @@ def play_game(is_learning):
         if result:
             break
 
+    if rAll == 0:
+        racers = []
+        for player in game.players:
+            racers = [*racers, *player.racers]
+        racers.sort()
+        racers.reverse()
+        game.print_cards()
+        game.draw_course(racers)
+        print(j)
+        print()
+        pass
+
     rList.append(rAll)
 
 def moving_average(a, n=3) :
@@ -129,8 +146,6 @@ if __name__ == '__main__':
             #           print(RL.q_table)
             print(i + 1, 'out of', num_episodes, 'episodes completed')
 
-    print('Score over time: ' + str(sum(rList) / num_episodes))
-    print('Final Q-Table Values')
     RL.plot_cost()
     import matplotlib.pyplot as plt
 
@@ -144,7 +159,7 @@ if __name__ == '__main__':
     plt.show()
 
     lines = ax.plot(np.arange(len(rList)-19), moving_average(rList, 20), 'r-', lw=1)
-
-plt.pause(0.1)
+    print('Score over time: ' + str(sum(rList) / num_episodes))
+    plt.pause(0.1)
 
 

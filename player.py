@@ -28,7 +28,7 @@ class Racer:
         self.deck.shuffle()
 
     def select_move(self, cardNo):
-        if len(self.hand_selection) == 4 and 0 <= cardNo <= 3:
+        if cardNo < len(self.hand_selection):
             # select which card to use
             self.next_move = self.hand_selection[cardNo]
 
@@ -37,14 +37,24 @@ class Racer:
 
             self.label = str(self.next_move.value) + self.type.name[0]
 
+
+    def add_exhaustion(self):
+    #    print('Exhaustion', self.name)
+        self.recycle_deck.cards.append(deck.Card(2))
+
     def draw_hand(self):
         if len(self.deck.cards) < 4:
+            if len(self.deck.cards) == 0 and len(self.recycle_deck.cards) == 0:
+                self.add_exhaustion()
             self.recycle_deck.shuffle()
             self.deck.cards = [*self.deck.cards, *(self.recycle_deck.cards)]
             self.recycle_deck.cards = []
 
         self.hand_selection = self.deck.draw(4)
         self.hand_selection.sort()
+
+    def is_valid_move(self, action):
+        return action < len(self.hand_selection)
 
     def move_token(self, places, others):
         self.token.distance_from_finish -= places
@@ -68,9 +78,6 @@ class Racer:
         self.hand_selection = []
         self.next_move = None
 
-    def add_exhaustion(self):
-    #    print('Exhaustion', self.name)
-        self.recycle_deck.cards.append(deck.Card(2))
 
     def __repr__(self):
         return self.token.__repr__()

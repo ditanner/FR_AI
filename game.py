@@ -190,7 +190,8 @@ def print_cards_for_racer(racer):
     for card in racer.hand_selection:
         print(card.value, end=' ')
 
-    print('Card to play:', racer.next_move.value, end=' ')
+    if racer.next_move is not None:
+        print('Card to play:', racer.next_move.value, end=' ')
 
     print(Fore.RESET)
 
