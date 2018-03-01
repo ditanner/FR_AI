@@ -7,6 +7,8 @@ from colorama import Fore
 
 from collections import Counter
 
+import numpy as np
+
 players = []
 
 
@@ -40,7 +42,7 @@ def current_observation():
                        *(hand + [-1] * 4)[:4], next_move, racer.token.distance_from_finish,
                        racer.token.on_right]
 
-    return results
+    return np.asarray(results)
 
 
 
@@ -169,16 +171,27 @@ def draw_course(reversed_racers):
 def print_cards():
     for player in players:
         for i in range(0, 2):
-            print(player.racers[i].colour + player.racers[i].name, 'Deck:', end=' ')
-            for card in player.racers[i].deck.cards:
-                print(card.value, end=' ')
+            print_cards_for_racer(player.racers[i])
 
-            print('Recycle:', end=' ')
 
-            for card in player.racers[i].recycle_deck.cards:
-                print(card.value, end=' ')
+def print_cards_for_racer(racer):
+    print(racer.colour + racer.name, 'Deck:', end=' ')
+    for card in racer.deck.cards:
+        print(card.value, end=' ')
 
-            print(Fore.RESET)
+    print('Recycle:', end=' ')
+
+    for card in racer.recycle_deck.cards:
+        print(card.value, end=' ')
+
+    print('Hand:', end=' ')
+
+    for card in racer.hand_selection:
+        print(card.value, end=' ')
+
+    print('Card to play:', racer.next_move.value, end=' ')
+
+    print(Fore.RESET)
 
 
 def make_move():

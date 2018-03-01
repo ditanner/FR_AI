@@ -65,6 +65,8 @@ class Racer:
 
     def take_move(self, others):
         self.move_token(self.next_move.value, others)
+        self.hand_selection = []
+        self.next_move = None
 
     def add_exhaustion(self):
     #    print('Exhaustion', self.name)
