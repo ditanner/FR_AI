@@ -110,6 +110,11 @@ def play_game(is_learning):
 
     rList.append(rAll)
 
+def moving_average(a, n=3) :
+    ret = np.cumsum(a, dtype=float)
+    ret[n:] = ret[n:] - ret[:-n]
+    return ret[n - 1:] / n
+
 
 if __name__ == '__main__':
     counter = 0
@@ -127,4 +132,19 @@ if __name__ == '__main__':
     print('Score over time: ' + str(sum(rList) / num_episodes))
     print('Final Q-Table Values')
     RL.plot_cost()
+    import matplotlib.pyplot as plt
+
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    ax.scatter(np.arange(len(rList)), rList)
+#    ax.yaxis.label = 'Result'
+#    ax.xaxis.label = 'episode'
+
+    plt.ion()
+    plt.show()
+
+    lines = ax.plot(np.arange(len(rList)-19), moving_average(rList, 20), 'r-', lw=1)
+
+plt.pause(0.1)
+
 
