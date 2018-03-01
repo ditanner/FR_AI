@@ -6,8 +6,8 @@ from SarsaLambda import SarsaLambdaTable
 
 print('SarsaLambda, 1 player game, R then S')
 
-initial_cards = 15
-max_recycle_deck = 15
+initial_cards = 7
+max_recycle_deck = 7
 cards_in_hand = 4
 position = 1
 on_right = 1

@@ -3,8 +3,9 @@ from time import sleep
 import player
 from square import Square
 
-import colorama
 from colorama import Fore
+
+from collections import Counter
 
 players = []
 
@@ -26,14 +27,16 @@ def current_observation():
     for player in players:
         for racer in player.racers:
             deck = [i.value for i in racer.deck.cards]
-            deck.sort()
+            c = Counter(deck)
+            deck = [c[2], c[3], c[4], c[5], c[6], c[7], c[9]]
             recycle_deck = [i.value for i in racer.recycle_deck.cards]
-            recycle_deck.sort()
+            c = Counter(recycle_deck)
+            recycle_deck = [c[2], c[3], c[4], c[5], c[6], c[7], c[9]]
             hand = [i.value for i in racer.hand_selection]
             next_move = -1
             if racer.next_move is not None:
                 next_move = racer.next_move.value
-            results = [*results, *(deck + [-1] * 15)[:15], *(recycle_deck + [-1] * 15)[:15],
+            results = [*results, *deck, *recycle_deck,
                        *(hand + [-1] * 4)[:4], next_move, racer.token.distance_from_finish,
                        racer.token.on_right]
 
