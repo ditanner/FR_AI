@@ -54,6 +54,8 @@ class DeepQNetwork:
         with tf.variable_scope('soft_replacement'):
             self.target_replace_op = [tf.assign(t, e) for t, e in zip(t_params, e_params)]
 
+        self.saver = tf.train.Saver()
+
         self.sess = tf.Session()
 
         if output_graph:
@@ -106,11 +108,11 @@ class DeepQNetwork:
         self.memory[index, :] = transition
         self.memory_counter += 1
 
-    def choose_action(self, observation):
+    def choose_action(self, observation, explore=True):
         # to have batch dimension when feed into tf placeholder
         observation = observation[np.newaxis, :]
 
-        if np.random.uniform() < self.epsilon:
+        if np.random.uniform() < self.epsilon or not explore:
             # forward feed the observation and get q value for every actions
             actions_value = self.sess.run(self.q_eval, feed_dict={self.s: observation})
             action = np.argmax(actions_value)
@@ -152,6 +154,29 @@ class DeepQNetwork:
         plt.ylabel('Cost')
         plt.xlabel('training steps')
         plt.show()
+
+    def variable_summaries(var):
+        """Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""
+        with tf.name_scope('summaries'):
+            mean = tf.reduce_mean(var)
+            tf.summary.scalar('mean', mean)
+            with tf.name_scope('stddev'):
+                stddev = tf.sqrt(tf.reduce_mean(tf.square(var - mean)))
+            tf.summary.scalar('stddev', stddev)
+            tf.summary.scalar('max', tf.reduce_max(var))
+            tf.summary.scalar('min', tf.reduce_min(var))
+            tf.summary.histogram('histogram', var)
+
+
+def launchTensorBoard():
+    import os
+    os.system('tensorboard --logdir=logs')
+    return
+
+def tb():
+    import threading
+    t = threading.Thread(target=launchTensorBoard, args=([]))
+    t.start()
 
 if __name__ == '__main__':
     DQN = DeepQNetwork(3,4, output_graph=True)

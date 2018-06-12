@@ -57,6 +57,25 @@ class SprinteurDeck(Deck):
                       Card(9), Card(9), Card(9)]
 
 
+class SprinteurTrainingDeck(Deck):
+    def __init__(self, training_scenario):
+        super().__init__('SprinteurTrainingDeck' + str(training_scenario))
+
+        if training_scenario == 1:
+            self.cards = [Card(9), Card(9), Card(9),
+                          Card(9)]
+        if training_scenario == 2:
+            self.cards = [Card(5), Card(5), Card(5),
+                          Card(9)]
+
+        else:
+            self.cards = [Card(2), Card(2), Card(2),
+                          Card(3), Card(3), Card(3),
+                          Card(4), Card(4), Card(4),
+                          Card(5), Card(5), Card(5),
+                          Card(9), Card(9), Card(9)]
+
+
 class RouleurDeck(Deck):
     def __init__(self):
         super().__init__('Rouleur')
@@ -65,6 +84,23 @@ class RouleurDeck(Deck):
                       Card(5), Card(5), Card(5),
                       Card(6), Card(6), Card(6),
                       Card(7), Card(7), Card(7)]
+
+class RouleurTrainingDeck(Deck):
+    def __init__(self, training_scenario):
+        super().__init__('RouleurTrainingDeck' + str(training_scenario))
+
+        if training_scenario == 1:
+            self.cards = [Card(7), Card(7), Card(7),
+                          Card(7)]
+        elif training_scenario == 2:
+            self.cards = [Card(5), Card(5), Card(5),
+                          Card(7)]
+        else:
+            self.cards = [Card(3), Card(3), Card(3),
+                          Card(4), Card(4), Card(4),
+                          Card(5), Card(5), Card(5),
+                          Card(6), Card(6), Card(6),
+                          Card(7), Card(7), Card(7)]
 
 
 def getDeck(racer_type):

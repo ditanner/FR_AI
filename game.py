@@ -9,7 +9,7 @@ from colorama import Fore
 from collections import Counter
 
 import numpy as np
-
+import deck
 
 class Game:
 
@@ -21,16 +21,31 @@ class Game:
         clear = "\n" * 100
         print(clear)
 
-    def setup(self, number_of_players, starting_distance=((8 * 6) + (12 * 2))):
+    def setup(self, number_of_players, starting_distance=((8 * 6) + (12 * 2)), training_scenario=None):
         self.starting_distance = starting_distance
         self.players.clear()
         self.players.append(player.Player('Player 1', 1, Fore.RED, starting_distance))
+
+        if training_scenario == 1:
+            self.players[0].racers[0].deck = deck.SprinteurTrainingDeck(1)
+            self.players[0].racers[1].deck = deck.RouleurTrainingDeck(1)
+        elif training_scenario ==2:
+            self.players[0].racers[0].deck = deck.SprinteurTrainingDeck(2)
+            self.players[0].racers[1].deck = deck.RouleurTrainingDeck(2)
+
         if number_of_players > 1:
             self.players.append(player.Player('Player 2', 2, Fore.YELLOW, starting_distance))
 
-    def current_observation(self):
+    def current_observation(self, restricted=False):
         results = []
-        for player in self.players:
+        player_list = []
+
+        if not restricted:
+            player_list = self.players
+        else:
+            player_list = [self.players[0]]
+
+        for player in player_list:
             for racer in player.racers:
                 deck = [i.value for i in racer.deck.cards]
                 c = Counter(deck)
@@ -42,9 +57,15 @@ class Game:
                 next_move = -1
                 if racer.next_move is not None:
                     next_move = racer.next_move.value
-                results = [*results, *deck, *recycle_deck,
-                           *(hand + [-1] * 4)[:4], next_move, racer.token.distance_from_finish,
-                           racer.token.on_right]
+
+                if not restricted:
+                    results = [*results, *deck, *recycle_deck,
+                               *(hand + [-1] * 4)[:4], next_move, racer.token.distance_from_finish,
+                               racer.token.on_right]
+                else:
+                    results = [*results, next_move, racer.token.distance_from_finish, racer.token.on_right]
+        #                    results = [*results, *(hand + [-1] * 4)[:4], next_move, racer.token.distance_from_finish,
+        #                               racer.token.on_right]
 
         return np.asarray(results)
 
